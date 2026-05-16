@@ -1,0 +1,68 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "img"
+public_folder: "/img"
+
+collections:
+  - name: "ustawienia"
+    label: "⚙️ Ustawienia strony"
+    files:
+      - name: "ustawienia"
+        label: "Ustawienia strony"
+        file: "ustawienia.json"
+        fields:
+          - label: "Opis na stronie głównej"
+            name: "opis"
+            widget: "text"
+            default: "Witamy w naszym magicznym świecie szkła!"
+          - label: "Link Facebook"
+            name: "facebook"
+            widget: "string"
+            default: "https://www.facebook.com/profile.php?id=61580146224938"
+          - label: "Link Instagram"
+            name: "instagram"
+            widget: "string"
+            default: "https://www.instagram.com/szklowelove/"
+          - label: "Link Vinted"
+            name: "vinted"
+            widget: "string"
+            default: "https://www.vinted.pl/member/110201494"
+          - label: "Link OLX"
+            name: "olx"
+            widget: "string"
+            default: ""
+          - label: "Kolor tła strony"
+            name: "tlo"
+            widget: "select"
+            default: "niebieski"
+            options:
+              - { label: "🔵 Niebieski (domyślny)", value: "niebieski" }
+              - { label: "🟠 Pomarańczowy", value: "pomaranczowy" }
+              - { label: "🟢 Zielony", value: "zielony" }
+              - { label: "🩷 Różowy", value: "rozowy" }
+              - { label: "🟣 Fioletowy", value: "fioletowy" }
+              - { label: "⚫ Ciemny (granatowy)", value: "ciemny" }
+              - { label: "🤍 Biały", value: "bialy" }
+              - { label: "🟡 Żółty", value: "zolty" }
+
+  - name: "produkty"
+    label: "🛍️ Produkty"
+    folder: "produkty"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: "Nazwa produktu"
+        name: "title"
+        widget: "string"
+      - label: "Zdjęcia produktu"
+        name: "images"
+        widget: "list"
+        summary: "{{fields.image}}"
+        field:
+          label: "Zdjęcie"
+          name: "image"
+          widget: "image"
+          media_folder: "/img/{{slug}}"
+          public_folder: "/img/{{slug}}"
