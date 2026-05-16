@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szklowelove - Sprzedaż szkła z pasją</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 100%);
+            transition: background 0.5s ease;
+        }
+
+        /* Przełącznik tła */
+        .bg-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 500;
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .bg-switcher span {
+            font-size: 11px;
+            color: #546e7a;
+            font-weight: 600;
+        }
+
+        .bg-options {
+            display: flex;
+            gap: 6px;
+        }
+
+        .bg-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .bg-btn:hover { transform: scale(1.2); }
+        .bg-btn.active { border-color: #333; }
+        .bg-btn.bg1 { background: linear-gradient(135deg, #f5f7fa, #e3f2fd); }
+        .bg-btn.bg2 { background: linear-gradient(135deg, #fff9f0, #ffe0cc); }
+        .bg-btn.bg3 { background: linear-gradient(135deg, #f0fff4, #c6f6d5); }
+        .bg-btn.bg4 { background: linear-gradient(135deg, #fdf2f8, #f3d4e8); }
+        .bg-btn.bg5 { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #2196F3;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .description {
+            color: #546e7a;
+            font-size: 1.2em;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .item-title {
+            padding: 15px;
+            text-align: center;
+            color: #37474f;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #546e7a;
+            font-size: 1.2em;
+            grid-column: 1/-1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            position: relative;
+            max-width: 800px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -15px; right: -15px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .modal-close:hover { background: #1976D2; }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(33, 150, 243, 0.8);
+            color: white;
+            border: none;
+            width: 50px; height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .modal-nav:hover { background: rgba(33, 150, 243, 1); }
+        .modal-prev { left: 10px; }
+        .modal-next { right: 10px; }
+
+        .image-counter {
+            text-align: center;
+            margin-top: 15px;
+            color: #546e7a;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .social-links a.facebook  { background: #1877F2; }
+        .social-links a.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .social-links a.vinted    { background: #09B1BA; }
+        .social-links a.olx       { background: #3bab37; }
+
+        .social-links svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .description { font-size: 1em; }
+            .gallery { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+            .modal-content { margin: 20px; max-width: 90%; }
+            .bg-switcher { top: 10px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-switcher">
+        <span>Tło</span>
+        <div class="bg-options">
+            <div class="bg-btn bg1 active" onclick="setBg(0)" title="Niebieskie"></div>
+            <div class="bg-btn bg2" onclick="setBg(1)" title="Pomarańczowe"></div>
+            <div class="bg-btn bg3" onclick="setBg(2)" title="Zielone"></div>
+            <div class="bg-btn bg4" onclick="setBg(3)" title="Różowe"></div>
+            <div class="bg-btn bg5" onclick="setBg(4)" title="Ciemne"></div>
+        </div>
+    </div>
+
+    <header>
+        <h1>✨ Szklowelove ✨</h1>
+        <p class="description">
+            Witamy w naszym magicznym świecie szkła! Z pasją i sercem zajmujemy się sprzedażą 
+            wyjątkowych szklanych przedmiotów, które dodadzą blasku Twojemu wnętrzu. 
+            Każdy element został starannie wyselekcjonowany, aby przynieść radość i elegancję 
+            do Twojego domu. Odkryj piękno szkła razem z nami! 💎
+        </p>
+    </header>
+
+    <div class="gallery" id="gallery">
+        <div class="loading">⏳ Ładowanie produktów...</div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <button class="modal-nav modal-prev" onclick="changeImage(-1)">&#8249;</button>
+            <button class="modal-nav modal-next" onclick="changeImage(1)">&#8250;</button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <div class="image-counter" id="imageCounter"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/profile.php?id=61580146224938" target="_blank" class="facebook">
+                <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+            </a>
+            <a href="https://www.instagram.com/szklowelove/" target="_blank" class="instagram">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                Instagram
+            </a>
+            <a href="https://www.vinted.pl/member/110201494" target="_blank" class="vinted">
+                <svg viewBox="0 0 24 24"><path d="M19.5 3h-3.75L12 14.25 8.25 3H4.5L9.75 18h4.5z"/><path d="M14.25 18h4.5l1.5-4.5h-4.5z"/></svg>
+                Vinted
+            </a>
+            <a href="https://www.olx.pl/" target="_blank" class="olx">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                OLX
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const backgrounds = [
+            'linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 100%)',
+            'linear-gradient(135deg, #fff9f0 0%, #ffe0cc 100%)',
+            'linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%)',
+            'linear-gradient(135deg, #fdf2f8 0%, #f3d4e8 100%)',
+            'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        ];
+
+        function setBg(index) {
+            document.body.style.background = backgrounds[index];
+            document.querySelectorAll('.bg-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            localStorage.setItem('szklowelove-bg', index);
+        }
+
+        const savedBg = localStorage.getItem('szklowelove-bg');
+        if (savedBg !== null) setBg(parseInt(savedBg));
+
+        // Parsowanie pliku .md (front matter)
+        function parseMD(text) {
+            const data = { title: '', images: [] };
+            const lines = text.split('\n');
+            let inFrontMatter = false;
+            let inImages = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.trim() === '---') {
+                    if (!inFrontMatter) { inFrontMatter = true; continue; }
+                    else break;
+                }
+                if (!inFrontMatter) continue;
+
+                if (line.startsWith('title:')) {
+                    data.title = line.replace('title:', '').trim().replace(/^["']|["']$/g, '');
+                }
+                if (line.startsWith('images:')) {
+                    inImages = true; continue;
+                }
+                if (inImages) {
+                    const match = line.match(/^\s*-\s*image:\s*(.+)/);
+                    if (match) {
+                        data.images.push(match[1].trim());
+                    } else if (line.trim() && !line.startsWith(' ') && !line.startsWith('\t')) {
+                        inImages = false;
+                    }
+                }
+            }
+            return data;
+        }
+
+        let products = [];
+        let currentImages = [];
+        let currentImageIndex = 0;
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('https://api.github.com/repos/Neekes96/Szklowelove/contents/produkty');
+                if (!response.ok) throw new Error('Brak folderu');
+
+                const files = await response.json();
+                const mdFiles = files.filter(f => f.name.endsWith('.md'));
+                if (mdFiles.length === 0) { showFallback(); return; }
+
+                const promises = mdFiles.map(async (file) => {
+                    const res = await fetch(file.download_url);
+                    const text = await res.text();
+                    return parseMD(text);
+                });
+
+                products = (await Promise.all(promises)).filter(p => p.title && p.images.length > 0);
+                if (products.length === 0) { showFallback(); return; }
+                generateGallery();
+
+            } catch (e) {
+                showFallback();
+            }
+        }
+
+        function showFallback() {
+            products = [
+                { title: "Bordo", images: ["img/Bordo/mainbordo1.JPG","img/Bordo/bordo2.JPG","img/Bordo/bordo3.JPG","img/Bordo/bordo4.JPG","img/Bordo/bordo5.JPG","img/Bordo/bordo6.JPG","img/Bordo/bordo7.JPG"] },
+                { title: "Kielich", images: ["img/Kielich/mainkielich1.JPG","img/Kielich/kielich2.JPG","img/Kielich/kielich3.JPG","img/Kielich/kielich4.JPG","img/Kielich/kielich5.JPG","img/Kielich/kielich6.JPG"] },
+                { title: "Kolorowa misa", images: ["img/Kolorowamisa/mainkolorowamisa1.JPG","img/Kolorowamisa/kolorowamisa2.JPG","img/Kolorowamisa/kolorowamisa3.JPG","img/Kolorowamisa/kolorowamisa4.JPG","img/Kolorowamisa/kolorowamisa5.JPG","img/Kolorowamisa/kolorowamisa6.JPG","img/Kolorowamisa/kolorowamisa7.JPG","img/Kolorowamisa/kolorowamisa8.JPG","img/Kolorowamisa/kolorowamisa9.JPG","img/Kolorowamisa/kolorowamisa10.JPG","img/Kolorowamisa/kolorowamisa11.JPG"] },
+                { title: "Kolorowe", images: ["img/Kolorowe/mainkolorowe1.JPG","img/Kolorowe/kolorowe2.JPG","img/Kolorowe/kolorowe3.JPG","img/Kolorowe/kolorowe4.JPG","img/Kolorowe/kolorowe5.JPG","img/Kolorowe/kolorowe6.JPG","img/Kolorowe/kolorowe7.JPG","img/Kolorowe/kolorowe8.JPG","img/Kolorowe/kolorowe9.JPG","img/Kolorowe/kolorowe10.JPG"] },
+                { title: "Patera", images: ["img/Patera/mainpatera1.JPG","img/Patera/patera2.JPG","img/Patera/patera3.JPG"] },
+                { title: "Szklane", images: ["img/Szklane/mainszklane1.JPG","img/Szklane/szklane2.JPG","img/Szklane/szklane3.JPG","img/Szklane/szklane4.JPG","img/Szklane/szklane5.JPG","img/Szklane/szklane6.JPG"] },
+                { title: "Talerz", images: ["img/Talerz/maintalerz1.JPG","img/Talerz/talerz2.JPG","img/Talerz/talerz3.JPG","img/Talerz/talerz4.JPG","img/Talerz/talerz5.JPG","img/Talerz/talerz6.JPG","img/Talerz/talerz7.JPG","img/Talerz/talerz8.JPG","img/Talerz/talerz9.JPG","img/Talerz/talerz10.JPG"] },
+                { title: "Wazon", images: ["img/Wazon/mainwazon1.JPG","img/Wazon/wazon2.JPG","img/Wazon/wazon3.JPG","img/Wazon/wazon4.JPG","img/Wazon/wazon5.JPG"] },
+                { title: "Zielone", images: ["img/Zielone/mainzielone1.JPG","img/Zielone/zielone2.JPG","img/Zielone/zielone3.JPG","img/Zielone/zielone4.JPG","img/Zielone/zielone5.JPG","img/Zielone/zielone6.JPG"] }
+            ];
+            generateGallery();
+        }
+
+        function generateGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            products.forEach((product, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.onclick = () => openModal(index);
+                item.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.title}">
+                    <div class="item-title">${product.title}</div>
+                `;
+                gallery.appendChild(item);
+            });
+        }
+
+        function openModal(index) {
+            currentImages = products[index].images;
+            currentImageIndex = 0;
+            updateModalImage();
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function changeImage(direction) {
+            currentImageIndex += direction;
+            if (currentImageIndex < 0) currentImageIndex = currentImages.length - 1;
+            if (currentImageIndex >= currentImages.length) currentImageIndex = 0;
+            updateModalImage();
+        }
+
+        function updateModalImage() {
+            document.getElementById('modalImage').src = currentImages[currentImageIndex];
+            document.getElementById('imageCounter').textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+        }
+
+        document.getElementById('modal').onclick = function(e) {
+            if (e.target === this) closeModal();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('modal').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') changeImage(-1);
+                if (e.key === 'ArrowRight') changeImage(1);
+                if (e.key === 'Escape') closeModal();
+            }
+        });
+
+        loadProducts();
+    </script>
+</body>
+</html>
